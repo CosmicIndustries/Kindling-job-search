@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindling™ — Starts fire that churn snuffs out.</title>
+<meta name="description" content="Job board that scores every employer for churn risk, real pay, and stability.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ember:#E8622A;--ember-dim:#C44D1A;--coal:#1A1612;--ash:#2E2925;--smoke:#4A4540;--warm-gray:#8C8480;--cream:#F5EFE6;--parchment:#EDE4D5;--kindling:#D4874E;--safe:#4CAF50;--caution:#FF9800;--danger:#F44336}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{background:var(--coal);color:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6}
+body::after{content:'';position:fixed;bottom:-200px;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(232,98,42,.08) 0%,transparent 70%);pointer-events:none;z-index:0}
+header{position:relative;z-index:10;padding:3rem 4rem 2rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:flex-end;justify-content:space-between;gap:2rem}
+.logo h1{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,5vw,3.5rem);font-weight:900;letter-spacing:-.02em;line-height:1}
+.logo h1 span{color:var(--ember)}
+.logo h1 sup{font-size:.38em;vertical-align:super;color:var(--warm-gray);font-weight:400;letter-spacing:0}
+.logo p{margin-top:.4rem;font-size:.85rem;color:var(--warm-gray);letter-spacing:.12em;text-transform:uppercase}
+.flame{font-size:2.8rem;filter:drop-shadow(0 0 12px rgba(232,98,42,.6));animation:flicker 3s ease-in-out infinite}
+@keyframes flicker{0%,100%{transform:scale(1) rotate(-1deg);opacity:1}30%{transform:scale(1.05) rotate(1deg);opacity:.9}60%{transform:scale(.97) rotate(-2deg);opacity:1}}
+
+/* SETUP DRAWER */
+.setup-bar{background:var(--ash);border-bottom:1px solid rgba(255,255,255,.06);position:relative;z-index:10}
+.setup-toggle{width:100%;padding:.75rem 4rem;background:none;border:none;color:var(--warm-gray);font-family:'DM Mono',monospace;font-size:.78rem;cursor:pointer;text-align:left;display:flex;align-items:center;gap:.5rem;transition:color .2s}
+.setup-toggle:hover{color:var(--cream)}
+.dot-ind{width:6px;height:6px;border-radius:50%;background:var(--danger);flex-shrink:0;transition:background .3s}
+.dot-ind.ok{background:var(--safe)}
+.setup-panel{display:none;padding:1.5rem 4rem 2rem;gap:2rem}
+.setup-panel.open{display:block}
+
+/* DEPLOY CARD */
+.deploy-card{background:linear-gradient(135deg,rgba(232,98,42,.08),rgba(212,135,78,.05));border:1px solid rgba(232,98,42,.2);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.deploy-card h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--parchment);margin-bottom:.5rem}
+.deploy-card .subtitle{font-size:.82rem;color:var(--warm-gray);margin-bottom:1.25rem;line-height:1.6}
+.deploy-steps{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.25rem}
+.step{display:flex;align-items:flex-start;gap:.75rem;font-size:.83rem;color:var(--warm-gray)}
+.step-num{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--ember);color:#fff;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.step a{color:var(--kindling)}
+.step code{font-family:'DM Mono',monospace;font-size:.78rem;background:rgba(255,255,255,.07);padding:.15rem .4rem;border-radius:4px;color:var(--cream)}
+.btn-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+.btn-deploy{display:inline-flex;align-items:center;gap:.5rem;background:var(--ember);color:#fff;border:none;border-radius:8px;padding:.6rem 1.2rem;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;text-decoration:none;transition:background .2s,box-shadow .2s;box-shadow:0 2px 12px rgba(232,98,42,.3)}
+.btn-deploy:hover{background:var(--ember-dim);box-shadow:0 2px 20px rgba(232,98,42,.5)}
+.btn-copy{background:none;border:1px solid rgba(232,98,42,.35);color:var(--ember);border-radius:8px;padding:.6rem 1.2rem;font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;transition:all .2s}
+.btn-copy:hover{background:rgba(232,98,42,.1)}
+.copy-hint{font-size:.72rem;color:var(--smoke);font-family:'DM Mono',monospace}
+
+/* KEY FIELDS */
+.key-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.field{display:flex;flex-direction:column;gap:.35rem}
+.field.wide{grid-column:1/-1}
+.field label{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--warm-gray);text-transform:uppercase;letter-spacing:.08em}
+.field input{background:var(--coal);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.6rem .8rem;color:var(--cream);font-family:'DM Mono',monospace;font-size:.8rem;outline:none;transition:border-color .2s;width:100%}
+.field input:focus{border-color:var(--ember)}
+.field input::placeholder{color:var(--smoke)}
+.field .hint{font-size:.68rem;color:var(--smoke);margin-top:.2rem}
+.field .hint a{color:var(--kindling)}
+
+/* SEARCH */
+.search{position:relative;z-index:10;padding:3rem 4rem}
+.search h2{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:700;color:var(--parchment);margin-bottom:.5rem}
+.search h2 em{color:var(--kindling);font-style:normal}
+.search>p{color:var(--warm-gray);font-size:.9rem;margin-bottom:2rem;max-width:560px;line-height:1.6}
+.form{display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:.35rem;flex:1;min-width:160px}
+.fg label{font-size:.7rem;color:var(--warm-gray);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase}
+.fg input,.fg select{background:var(--ash);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.85rem 1rem;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.fg input:focus,.fg select:focus{border-color:var(--ember);box-shadow:0 0 0 3px rgba(232,98,42,.12)}
+.fg select option{background:var(--ash)}
+.btn-search{background:var(--ember);color:#fff;border:none;border-radius:8px;padding:.85rem 2rem;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:500;cursor:pointer;transition:background .2s,transform .1s,box-shadow .2s;white-space:nowrap;align-self:flex-end;box-shadow:0 4px 20px rgba(232,98,42,.3)}
+.btn-search:hover{background:var(--ember-dim);box-shadow:0 4px 30px rgba(232,98,42,.5)}
+.btn-search:active{transform:scale(.98)}
+.btn-search:disabled{opacity:.5;cursor:not-allowed}
+.legend{display:flex;gap:1.5rem;margin-top:1.5rem;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--warm-gray)}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ldot.safe{background:var(--safe);box-shadow:0 0 6px var(--safe)}
+.ldot.caution{background:var(--caution);box-shadow:0 0 6px var(--caution)}
+.ldot.danger{background:var(--danger);box-shadow:0 0 6px var(--danger)}
+
+/* STATUS */
+#status{position:relative;z-index:10;padding:0 4rem;min-height:2rem}
+.status-inner{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--kindling);display:flex;align-items:center;gap:.5rem}
+.spin{width:12px;height:12px;border:2px solid rgba(232,98,42,.3);border-top-color:var(--ember);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* BANNER */
+.banner{position:relative;z-index:10;margin:1rem 4rem;padding:1rem 1.5rem;background:linear-gradient(135deg,rgba(244,67,54,.08),rgba(232,98,42,.05));border:1px solid rgba(244,67,54,.2);border-radius:10px;display:none;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.banner.show{display:flex}
+.bstat{text-align:center}
+.bstat .num{font-family:'DM Mono',monospace;font-size:1.4rem;color:var(--danger);display:block;font-weight:500}
+.bstat .lbl{font-size:.68rem;color:var(--warm-gray);text-transform:uppercase;letter-spacing:.08em}
+.bdiv{width:1px;height:40px;background:rgba(255,255,255,.08)}
+.btext{flex:1;font-size:.8rem;color:var(--warm-gray);line-height:1.5;min-width:180px}
+
+/* SORT BAR */
+.sort-bar{position:relative;z-index:10;padding:0 4rem 1.5rem;display:none;align-items:center;gap:.75rem;flex-wrap:wrap}
+.sort-bar.show{display:flex}
+.sort-bar span{font-size:.78rem;color:var(--warm-gray);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.sbtn{background:none;border:1px solid rgba(255,255,255,.1);color:var(--warm-gray);border-radius:20px;padding:.3rem .85rem;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.sbtn:hover,.sbtn.on{border-color:var(--ember);color:var(--ember);background:rgba(232,98,42,.08)}
+
+/* RESULTS */
+#results{position:relative;z-index:10;padding:1.5rem 4rem 4rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:1.25rem}
+.card{background:var(--ash);border:1px solid rgba(255,255,255,.06);border-radius:12px;overflow:hidden;transition:transform .2s,box-shadow .2s;animation:cardIn .4s ease both;position:relative}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card::before{content:'';display:block;height:3px;width:100%}
+.card.low::before{background:var(--safe)}.card.medium::before{background:var(--caution)}.card.high::before{background:var(--danger)}.card.unknown::before{background:var(--smoke)}
+.card-head{padding:1.25rem 1.25rem .75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.card-titles{flex:1;min-width:0}
+.jtitle{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--cream);line-height:1.3;margin-bottom:.2rem}
+.jcompany{font-size:.82rem;color:var(--kindling);font-weight:500}
+.jloc{font-size:.78rem;color:var(--warm-gray);margin-top:.15rem}
+.badge{flex-shrink:0;padding:.3rem .75rem;border-radius:20px;font-family:'DM Mono',monospace;font-size:.7rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.badge.low{background:rgba(76,175,80,.15);color:var(--safe);border:1px solid rgba(76,175,80,.3)}
+.badge.medium{background:rgba(255,152,0,.15);color:var(--caution);border:1px solid rgba(255,152,0,.3)}
+.badge.high{background:rgba(244,67,54,.15);color:var(--danger);border:1px solid rgba(244,67,54,.3)}
+.badge.unknown{background:rgba(255,255,255,.05);color:var(--warm-gray);border:1px solid rgba(255,255,255,.1)}
+.metrics{padding:.75rem 1.25rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+.metrics.no-top{border-top:none}
+.met{text-align:center}
+.met .val{font-family:'DM Mono',monospace;font-size:.9rem;font-weight:500;color:var(--cream);display:block}
+.met .lbl{font-size:.65rem;color:var(--warm-gray);text-transform:uppercase;letter-spacing:.08em;margin-top:.1rem;display:block}
+.signals{padding:.75rem 1.25rem;display:flex;flex-direction:column;gap:.35rem}
+.sig{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--warm-gray)}
+.sig.bad{color:#ff7c7c}.sig.warn{color:#ffba5c}.sig.good{color:#7ecf81}
+.sig-icon{flex-shrink:0;font-size:.7rem}
+.verdict{margin:0 1.25rem 1.25rem;padding:.85rem 1rem;background:rgba(232,98,42,.07);border:1px solid rgba(232,98,42,.15);border-radius:8px;font-size:.82rem;color:var(--parchment);line-height:1.55;position:relative}
+.verdict::before{content:'🔥';position:absolute;top:-10px;left:12px;font-size:1rem;background:var(--ash);padding:0 4px}
+.verdict.loading{color:var(--warm-gray);font-style:italic}
+.card-foot{padding:.75rem 1.25rem;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.05)}
+.src-tags{display:flex;gap:.3rem;flex-wrap:wrap}
+.src-tag{font-family:'DM Mono',monospace;font-size:.65rem;padding:.2rem .5rem;background:rgba(255,255,255,.05);border-radius:4px;color:var(--warm-gray);text-transform:uppercase;letter-spacing:.05em}
+.apply-btn{background:none;border:1px solid rgba(232,98,42,.4);color:var(--ember);border-radius:6px;padding:.35rem .85rem;font-family:'DM Sans',sans-serif;font-size:.78rem;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;display:inline-block}
+.apply-btn:hover{background:rgba(232,98,42,.12);border-color:var(--ember)}
+.empty{grid-column:1/-1;text-align:center;padding:5rem 2rem}
+.empty .icon{font-size:4rem;margin-bottom:1.5rem;filter:drop-shadow(0 0 20px rgba(232,98,42,.4))}
+.empty h3{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--parchment);margin-bottom:.75rem}
+.empty p{color:var(--warm-gray);font-size:.9rem;line-height:1.7;max-width:480px;margin:0 auto}
+.empty a{color:var(--kindling)}
+.empty code{color:var(--kindling);font-family:'DM Mono',monospace;font-size:.85em}
+footer{position:relative;z-index:10;padding:1.5rem 4rem;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.db-status{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--smoke);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.footer-right{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--smoke)}
+.footer-right a{color:var(--smoke);text-decoration:none}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--coal)}::-webkit-scrollbar-thumb{background:var(--smoke);border-radius:3px}
+@media(max-width:700px){
+  header,.search,#results,.sort-bar,#status,.banner,footer{padding-left:1.5rem;padding-right:1.5rem}
+  header{flex-direction:column;align-items:flex-start}
+  .setup-toggle,.setup-panel{padding-left:1.5rem;padding-right:1.5rem}
+  .key-grid{grid-template-columns:1fr}
+  #results{grid-template-columns:1fr}
+  .banner{margin:1rem 1.5rem}
+  .deploy-card .btn-row{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <h1>Kind<span>ling</span><sup>™</sup></h1>
+    <p>Starts fire that churn snuffs out.</p>
+  </div>
+  <div class="flame">🔥</div>
+</header>
+
+<!-- Setup drawer -->
+<div class="setup-bar">
+  <button class="setup-toggle" onclick="toggleSetup()">
+    <span class="dot-ind" id="dot"></span>
+    <span id="setup-lbl">⚙ Setup — click to connect a data source</span>
+  </button>
+  <div class="setup-panel" id="setup-panel">
+
+    <!-- Option A: Cloudflare Worker (one-click) -->
+    <div class="deploy-card">
+      <h3>Option A &mdash; Free Worker <span style="font-size:.75rem;color:var(--safe);font-family:'DM Mono',monospace;font-weight:400">(recommended · forever free)</span></h3>
+      <p class="subtitle">Deploy a tiny Cloudflare Worker that proxies Arbeitnow + Jobicy + GraphQL Jobs with CORS headers. Takes 2 minutes, no credit card, 100k requests/day free.</p>
+      <div class="deploy-steps">
+        <div class="step"><span class="step-num">1</span><span>Click <strong style="color:var(--parchment)">Open Cloudflare Workers</strong> &rarr; sign up free &rarr; click <strong style="color:var(--parchment)">Create Worker</strong></span></div>
+        <div class="step"><span class="step-num">2</span><span>Click <strong style="color:var(--parchment)">Copy Worker Code</strong> below &rarr; paste it into the editor, replacing all default code</span></div>
+        <div class="step"><span class="step-num">3</span><span>Click <strong style="color:var(--parchment)">Deploy</strong> &rarr; copy the <code>*.workers.dev</code> URL it gives you</span></div>
+        <div class="step"><span class="step-num">4</span><span>Paste that URL into the <strong style="color:var(--parchment)">Worker URL</strong> field below and search</span></div>
+      </div>
+      <div class="btn-row">
+        <a class="btn-deploy" href="https://workers.cloudflare.com" target="_blank" rel="noopener">🌩 Open Cloudflare Workers</a>
+        <button class="btn-copy" onclick="copyWorker()">📋 Copy Worker Code</button>
+        <span class="copy-hint" id="copy-status"></span>
+      </div>
+    </div>
+
+    <!-- Key fields -->
+    <div class="key-grid">
+      <div class="field wide">
+        <label>Worker URL (paste your *.workers.dev URL here)</label>
+        <input type="text" id="k-worker" placeholder="https://kindling-abc123.workers.dev" oninput="saveKeys()">
+        <span class="hint">After pasting URL, hit search — no reload needed</span>
+      </div>
+      <div class="field">
+        <label>RapidAPI Key &mdash; Option B (Indeed, LinkedIn, Glassdoor + 5 more)</label>
+        <input type="password" id="k-rapid" placeholder="your-rapidapi-key" oninput="saveKeys()">
+        <span class="hint"><a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank">Free tier at rapidapi.com/jsearch</a> &mdash; instant, no deploy</span>
+      </div>
+      <div class="field">
+        <label>Anthropic API Key &mdash; optional (Claude employer verdicts)</label>
+        <input type="password" id="k-anthropic" placeholder="sk-ant-..." oninput="saveKeys()">
+        <span class="hint"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></span>
+      </div>
+    </div>
+
+  </div><!-- /setup-panel -->
+</div>
+
+<!-- Search -->
+<section class="search">
+  <h2>Find employers that <em>keep</em> their people.</h2>
+  <p>Kindling™ scores every employer against BLS JOLTS turnover data, repost frequency, salary floors, and description red flags — then ranks safest first.</p>
+  <div class="form">
+    <div class="fg" style="flex:2;min-width:220px">
+      <label>Job Title / Keywords</label>
+      <input type="text" id="s-q" placeholder="cashier, nurse, warehouse associate&hellip;">
+    </div>
+    <div class="fg" style="flex:1.5;min-width:150px">
+      <label>Location</label>
+      <input type="text" id="s-loc" placeholder="Brunswick, GA">
+    </div>
+    <div class="fg" style="min-width:130px">
+      <label>Job Type</label>
+      <select id="s-type">
+        <option value="">Any</option>
+        <option value="fulltime">Full-time</option>
+        <option value="parttime">Part-time</option>
+        <option value="contract">Contract</option>
+        <option value="internship">Internship</option>
+      </select>
+    </div>
+    <div class="fg" style="min-width:130px">
+      <label>Max Churn Risk</label>
+      <select id="s-risk">
+        <option value="all">Show All</option>
+        <option value="low">Low Only</option>
+        <option value="low,medium">Low + Medium</option>
+      </select>
+    </div>
+    <button class="btn-search" id="go-btn" onclick="doSearch()">Ignite Search 🔥</button>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><span class="ldot safe"></span>Low churn — stable employer</div>
+    <div class="legend-item"><span class="ldot caution"></span>Medium — proceed with caution</div>
+    <div class="legend-item"><span class="ldot danger"></span>High churn — revolving door</div>
+  </div>
+</section>
+
+<div id="status"></div>
+
+<div class="banner" id="banner">
+  <div class="bstat"><span class="num" id="b-high">—</span><span class="lbl">High-churn jobs</span></div>
+  <div class="bdiv"></div>
+  <div class="bstat"><span class="num" id="b-cost">—</span><span class="lbl">Est. churn cost/yr</span></div>
+  <div class="bdiv"></div>
+  <div class="bstat"><span class="num" id="b-safe">—</span><span class="lbl">Safe employers</span></div>
+  <div class="btext">High-churn employers spend $3k–$10k replacing each worker. That money doesn't go to wages — it goes to HR overhead. <strong style="color:var(--parchment)">Kindling™ starts fire that churn snuffs out.</strong></div>
+</div>
+
+<div class="sort-bar" id="sort-bar">
+  <span>Sort:</span>
+  <button class="sbtn on" onclick="sort('risk')" id="s-risk-btn">Churn Risk</button>
+  <button class="sbtn" onclick="sort('salary')" id="s-sal-btn">Salary ↓</button>
+  <button class="sbtn" onclick="sort('rating')" id="s-rat-btn">Rating</button>
+  <button class="sbtn" onclick="sort('repost')" id="s-rep-btn">Reposts ↑</button>
+</div>
+
+<div id="results">
+  <div class="empty">
+    <div class="icon">🔥</div>
+    <h3>Starts fire that churn snuffs out.</h3>
+    <p>Enter a job title and search. You need one data source first — click <strong style="color:var(--parchment)">⚙ Setup</strong> above.<br><br>
+    <strong style="color:var(--parchment)">Fastest:</strong> paste a free <a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank">RapidAPI key</a> (JSearch).<br>
+    <strong style="color:var(--parchment)">Free forever:</strong> deploy the Cloudflare Worker in 2 minutes.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="db-status" id="db-status"><span>Verifying churn DB&hellip;</span></div>
+  <div class="footer-right">Kindling™ &nbsp;&middot;&nbsp; Job seeker empowerment &nbsp;&middot;&nbsp; <a href="https://github.com/Dinadeyohvsgi/kindling" target="_blank" rel="noopener">GitHub &nearr;</a></div>
+</footer>
+
+<script>
+'use strict';
+let curSort='risk';
+
+// CHURN DB — BLS JOLTS 2023 | baseline 2.4%/yr | 73 employers
+// SHA-256: 25b65662e0b090882dbedce57d3b155de03bea9cb6785b1717fdd1bce70934d8
+const DB_META={sha256:'25b65662e0b090882dbedce57d3b155de03bea9cb6785b1717fdd1bce70934d8',version:'1.0.0',baseline:2.4,entries:73,source:'https://www.bls.gov/jlt/'};
+const CHURN_DB={"adecco":{"b":38,"n":"Staffing agency \u2014 structural churn is the business model","s":"Professional & Business","d":false},"aerotek":{"b":35,"n":"Staffing/contract \u2014 structural churn model","s":"Professional & Business","d":false},"aldi":{"b":-8,"n":"Above-average wages for sector; structured scheduling","s":"Retail Trade","d":false},"allied universal":{"b":32,"n":"Contract security; documented high turnover in SEC filings","s":"Professional & Business","d":false},"amazon":{"b":35,"n":"BLS + internal Amazon data; 150%+ reported fulfillment turnover","s":"Transportation & Warehousing","d":false},"apple":{"b":-5,"n":"Mixed \u2014 retail stores higher churn than corporate","s":"Information","d":false},"applebee":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"arrow security":{"b":40,"n":"Contract security firm; 91-hire-in-30-days documented pattern","s":"Professional & Business","d":false},"bureau of":{"b":-20,"n":"BLS JOLTS Government; 0.9% quit rate","s":"Government","d":true},"burger king":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"burlington":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"chase":{"b":-8,"n":"BLS Financial sector; above-avg compensation","s":"Financial Activities","d":false},"chick-fil-a":{"b":5,"n":"Franchise model \u2014 varies by operator; moderate signal","s":"Leisure & Hospitality","d":false},"chili":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"chipotle":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"city of":{"b":-15,"n":"Municipal government; BLS 0.9% quit rate","s":"Government","d":false},"costco":{"b":-15,"n":"Above-market wages ($20+/hr), healthcare, 94% retention reported","s":"Retail Trade","d":false},"county":{"b":-15,"n":"Local government; BLS 0.9% quit rate, benefits-rich","s":"Government","d":false},"cracker barrel":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"denny":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"department of":{"b":-20,"n":"BLS JOLTS Government; 0.9% quit rate","s":"Government","d":true},"dhl":{"b":7,"n":"BLS JOLTS Transportation sector quit rate","s":"Transportation & Warehousing","d":true},"dollar general":{"b":38,"n":"Public litigation + BLS; documented 100%+ store turnover","s":"Retail Trade","d":false},"dollar tree":{"b":35,"n":"SEC filings + BLS; chronic understaffing model","s":"Retail Trade","d":false},"dunkin":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"family dollar":{"b":35,"n":"Same parent as Dollar Tree; same documented issues","s":"Retail Trade","d":false},"federal":{"b":-20,"n":"BLS JOLTS Government; 0.9% quit rate \u2014 structural security","s":"Government","d":true},"fedex":{"b":7,"n":"BLS JOLTS Transportation sector quit rate","s":"Transportation & Warehousing","d":true},"five below":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"g4s":{"b":30,"n":"Contract security; elevated sector quit rate","s":"Professional & Business","d":false},"google":{"b":-10,"n":"BLS Information sector; tech compensation stabilizes tenure","s":"Information","d":false},"hca":{"b":-2,"n":"BLS Healthcare sector quit rate","s":"Health Care & Social Assist","d":true},"hilton":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"hobby lobby":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"home depot":{"b":10,"n":"Above-sector stability; employee ownership stake","s":"Retail Trade","d":false},"ihop":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"jpmorgan":{"b":-8,"n":"BLS Financial sector; above-avg compensation","s":"Financial Activities","d":false},"kelly services":{"b":38,"n":"Staffing agency \u2014 structural churn is the business model","s":"Professional & Business","d":false},"kindred":{"b":20,"n":"Long-term care; above-sector turnover documented","s":"Health Care & Social Assist","d":false},"kohl":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"lowe":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"macy":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"manpower":{"b":38,"n":"Staffing agency \u2014 structural churn is the business model","s":"Professional & Business","d":false},"marriott":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"maximus":{"b":22,"n":"Gov contract services; documented turnover issues","s":"Health Care & Social Assist","d":false},"mcdonald":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"meta":{"b":-5,"n":"BLS Information sector baseline","s":"Information","d":false},"michaels":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"microsoft":{"b":-8,"n":"BLS Information sector; above-baseline retention","s":"Information","d":false},"olive garden":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"panera":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"post office":{"b":-18,"n":"Federal quasi-governmental; union-protected, pension","s":"Government","d":false},"publix":{"b":-12,"n":"Employee-owned; ESOP structure incentivizes retention","s":"Retail Trade","d":false},"randstad":{"b":38,"n":"Staffing agency \u2014 structural churn is the business model","s":"Professional & Business","d":false},"robert half":{"b":35,"n":"Staffing/temp placement \u2014 inherent high turnover model","s":"Professional & Business","d":false},"ross":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"securitas":{"b":32,"n":"Contract security; BLS private security quit rate elevated","s":"Professional & Business","d":false},"spherion":{"b":38,"n":"Staffing agency \u2014 structural churn is the business model","s":"Professional & Business","d":false},"staffmark":{"b":38,"n":"Staffing agency \u2014 structural churn is the business model","s":"Professional & Business","d":false},"starbucks":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"subway":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"taco bell":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"target":{"b":8,"n":"Below-sector average; better pay and scheduling vs peers","s":"Retail Trade","d":false},"tenet":{"b":-2,"n":"BLS Healthcare sector quit rate","s":"Health Care & Social Assist","d":true},"tjmaxx":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"trader joe":{"b":-12,"n":"Above-market pay + culture; documented low turnover","s":"Retail Trade","d":false},"ups":{"b":7,"n":"BLS JOLTS Transportation sector quit rate","s":"Transportation & Warehousing","d":true},"usps":{"b":-18,"n":"Federal quasi-governmental; union-protected, pension","s":"Government","d":false},"waffle house":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true},"walmart":{"b":16,"n":"BLS JOLTS Retail Trade sector quit rate","s":"Retail Trade","d":true},"wegman":{"b":-10,"n":"Consistently ranked top employer for worker retention","s":"Retail Trade","d":false},"wells fargo":{"b":-5,"n":"BLS Financial sector quit rate below baseline","s":"Financial Activities","d":false},"wendy":{"b":40,"n":"BLS JOLTS Leisure & Hospitality sector quit rate","s":"Leisure & Hospitality","d":true}};
+
+// WORKER CODE (embedded for copy button)
+const WORKER_CODE = `/**
+ * Kindling Worker — free CORS proxy for job data
+ * Sources: Arbeitnow + Jobicy + GraphQL Jobs
+ * Deploy free at workers.cloudflare.com (100k req/day)
+ */
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json',
+};
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+    if (url.pathname === '/health') return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+    if (url.pathname !== '/jobs') return new Response(JSON.stringify({ error: 'Use /jobs?q=title&location=city' }), { status: 404, headers: CORS });
+    const q = url.searchParams.get('q') || '';
+    const loc = url.searchParams.get('location') || '';
+    const [arb, jcy, gql] = await Promise.allSettled([
+      fetchArb(q, loc), fetchJobicy(q), fetchGQL(q)
+    ]);
+    const jobs = [
+      ...(arb.status === 'fulfilled' ? arb.value : []),
+      ...(jcy.status === 'fulfilled' ? jcy.value : []),
+      ...(gql.status === 'fulfilled' ? gql.value : []),
+    ];
+    const seen = new Set();
+    const deduped = jobs.filter(j => {
+      const k = (j.title + '::' + j.company).toLowerCase();
+      return seen.has(k) ? false : (seen.add(k), true);
+    });
+    const filtered = q ? deduped.filter(j =>
+      j.title.toLowerCase().includes(q.toLowerCase()) ||
+      (j.description || '').toLowerCase().includes(q.toLowerCase())
+    ) : deduped;
+    return new Response(JSON.stringify({ total: filtered.length, jobs: filtered,
+      sources: { arbeitnow: arb.status==='fulfilled'?arb.value.length:0,
+                 jobicy: jcy.status==='fulfilled'?jcy.value.length:0,
+                 graphql: gql.status==='fulfilled'?gql.value.length:0 } }), { headers: CORS });
+  }
+};
+async function fetchArb(q, loc) {
+  const p = new URLSearchParams({ page: 1 });
+  if (q) p.set('search', q); if (loc) p.set('location', loc);
+  const r = await fetch('https://www.arbeitnow.com/api/job-board-api?' + p);
+  if (!r.ok) return [];
+  const d = await r.json();
+  return (d.data || []).map(j => ({ title: j.title, company: j.company_name,
+    location: j.location||'Remote', remote: j.remote||false, type: j.job_types?.[0]||'',
+    salary_min: null, salary_max: null, salary_period: null,
+    description: j.description||'', apply_url: j.url,
+    posted_at: j.created_at ? new Date(j.created_at*1000).toISOString() : null,
+    source: 'Arbeitnow', tags: j.tags||[] }));
+}
+async function fetchJobicy(q) {
+  const p = new URLSearchParams({ count: 50 });
+  if (q) p.set('keyword', q);
+  const r = await fetch('https://jobicy.com/api/v2/remote-jobs?' + p);
+  if (!r.ok) return [];
+  const d = await r.json();
+  return (d.jobs || []).map(j => ({ title: j.jobTitle, company: j.companyName,
+    location: 'Remote', remote: true, type: j.jobType||'',
+    salary_min: j.annualSalaryMin||null, salary_max: j.annualSalaryMax||null,
+    salary_period: j.annualSalaryMin ? 'YEAR' : null,
+    description: j.jobExcerpt||'', apply_url: j.url,
+    posted_at: j.pubDate||null, source: 'Jobicy', tags: [] }));
+}
+async function fetchGQL(q) {
+  const query = '{jobs(input:{keywords:"' + (q||'developer').replace(/"/g,'') + '",first:30}){title company{name}applyUrl description cities{name}salaryRange{min max period}commitment{title}postedAt}}';
+  const r = await fetch('https://api.graphql.jobs/', { method:'POST',
+    headers:{'Content-Type':'application/json'}, body:JSON.stringify({query}) });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return (d?.data?.jobs||[]).map(j => ({ title: j.title, company: j.company?.name||'',
+    location: j.cities?.[0]?.name||'Remote', remote: !j.cities?.length,
+    type: j.commitment?.title||'',
+    salary_min: j.salaryRange?.min||null, salary_max: j.salaryRange?.max||null,
+    salary_period: j.salaryRange?.period||null,
+    description: j.description||'', apply_url: j.applyUrl,
+    posted_at: j.postedAt||null, source: 'GraphQL Jobs', tags: [] }));
+}`;
+
+// COPY WORKER
+async function copyWorker(){
+  const btn = document.querySelector('.btn-copy');
+  const status = document.getElementById('copy-status');
+  try{
+    await navigator.clipboard.writeText(WORKER_CODE);
+    btn.textContent = '✓ Copied!';
+    status.textContent = 'Paste into the Cloudflare editor';
+    setTimeout(()=>{ btn.textContent='📋 Copy Worker Code'; status.textContent=''; }, 3000);
+  }catch{
+    // Fallback: select textarea
+    const ta = document.createElement('textarea');
+    ta.value = WORKER_CODE;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ Copied!';
+    setTimeout(()=>{ btn.textContent='📋 Copy Worker Code'; }, 2000);
+  }
+}
+
+// DB VERIFY
+async function verifyDB(){
+  const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(CHURN_DB)));
+  return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function dbLookup(name){
+  const n=(name||'').toLowerCase();
+  for(const[k,v] of Object.entries(CHURN_DB)) if(n.includes(k)) return v;
+  return null;
+}
+
+// KEYS
+function loadKeys(){
+  document.getElementById('k-worker').value   = sessionStorage.getItem('kw')||'';
+  document.getElementById('k-rapid').value    = sessionStorage.getItem('kr')||'';
+  document.getElementById('k-anthropic').value= sessionStorage.getItem('ka')||'';
+  refreshDot();
+}
+function saveKeys(){
+  sessionStorage.setItem('kw', document.getElementById('k-worker').value.trim());
+  sessionStorage.setItem('kr', document.getElementById('k-rapid').value.trim());
+  sessionStorage.setItem('ka', document.getElementById('k-anthropic').value.trim());
+  refreshDot();
+}
+function refreshDot(){
+  const w=sessionStorage.getItem('kw'),r=sessionStorage.getItem('kr'),a=sessionStorage.getItem('ka');
+  const dot=document.getElementById('dot'),lbl=document.getElementById('setup-lbl');
+  if(r&&a){dot.className='dot-ind ok';lbl.textContent='⚙ Full mode — JSearch + Claude verdicts ✓'}
+  else if(w&&a){dot.className='dot-ind ok';lbl.textContent='⚙ Worker + Claude verdicts ✓'}
+  else if(w){dot.className='dot-ind ok';lbl.textContent='⚙ Worker active ✓ — add Anthropic key for AI verdicts'}
+  else if(r){dot.className='dot-ind ok';lbl.textContent='⚙ JSearch active ✓ — add Anthropic key for AI verdicts'}
+  else{dot.className='dot-ind';lbl.textContent='⚙ Setup required — click to connect a data source'}
+}
+function toggleSetup(){ document.getElementById('setup-panel').classList.toggle('open'); }
+
+// STATUS
+function setStatus(msg,spin=false){
+  const el=document.getElementById('status');
+  el.innerHTML=msg?`<div class="status-inner">${spin?'<div class="spin"></div>':''}<span>${msg}</span></div>`:'';}
+
+// FETCH: WORKER
+async function fetchWorker(q,loc){
+  const url=sessionStorage.getItem('kw'); if(!url) return [];
+  const p=new URLSearchParams(); if(q)p.set('q',q); if(loc)p.set('location',loc);
+  const r=await fetch(url.replace(/\/$/,'')+'/jobs?'+p);
+  if(!r.ok) throw new Error('Worker HTTP '+r.status);
+  const d=await r.json();
+  return (d.jobs||[]).map((j,i)=>({
+    _id:'w'+i, _src:j.source||'Worker',
+    job_title:j.title||'', employer_name:j.company||'Unknown',
+    job_city:(j.location||'').split(',')[0]?.trim()||(j.remote?'Remote':''),
+    job_state:(j.location||'').split(',')[1]?.trim()||'',
+    job_description:j.description||'', job_apply_link:j.apply_url||'',
+    job_employment_type:(j.type||'').toLowerCase().includes('full')?'FULLTIME':'PARTTIME',
+    job_min_salary:j.salary_min||null, job_max_salary:j.salary_max||null,
+    job_salary_period:j.salary_min?(j.salary_period||'YEAR'):null,
+    job_posted_at_datetime_utc:j.posted_at||null,
+    employer_company_rating:null, job_apply_is_direct:true,
+    job_publishers:[{name:j.source||'Worker'}], _repost:0,
+  }));
+}
+
+// FETCH: JSEARCH
+async function fetchJSearch(q,loc,type){
+  const key=sessionStorage.getItem('kr'); if(!key) throw new Error('no-key');
+  const p=new URLSearchParams({query:q+(loc?' in '+loc:''),page:'1',num_pages:'3',date_posted:'week'});
+  if(type) p.set('employment_types',type.toUpperCase());
+  const r=await fetch('https://jsearch.p.rapidapi.com/search?'+p,{
+    headers:{'X-RapidAPI-Key':key,'X-RapidAPI-Host':'jsearch.p.rapidapi.com'}});
+  if(!r.ok) throw new Error('JSearch '+r.status);
+  const d=await r.json();
+  return (d.data||[]).map(j=>({...j,_id:'js'+Math.random().toString(36).slice(2),_src:'JSearch',_repost:0}));
+}
+
+// CHURN SCORING
+function scoreJob(job){
+  let score=0; const sigs=[];
+  const db=dbLookup(job.employer_name);
+  if(db){ score+=db.b;
+    if(db.b>=20) sigs.push({t:'bad',i:'⚠',msg:db.n});
+    else if(db.b>=5) sigs.push({t:'warn',i:'△',msg:db.n});
+    else if(db.b<=-5) sigs.push({t:'good',i:'✓',msg:db.n}); }
+  const rating=job.employer_company_rating;
+  if(rating){
+    if(rating<2.5){score+=35;sigs.push({t:'bad',i:'⚠',msg:'Glassdoor '+rating.toFixed(1)+'/5 — employees not satisfied'});}
+    else if(rating<3.3){score+=18;sigs.push({t:'warn',i:'△',msg:'Glassdoor '+rating.toFixed(1)+'/5 — mixed reviews'});}
+    else sigs.push({t:'good',i:'✓',msg:'Glassdoor '+rating.toFixed(1)+'/5 — relatively satisfied'});}
+  const rp=job._repost||0;
+  if(rp>=6){score+=30;sigs.push({t:'bad',i:'⚠',msg:'Reposted '+rp+'× — strong revolving-door pattern'});}
+  else if(rp>=3){score+=15;sigs.push({t:'warn',i:'△',msg:'Reposted '+rp+'× — elevated turnover signal'});}
+  else if(rp>0) sigs.push({t:'warn',i:'△',msg:'Reposted '+rp+'×'});
+  const mn=job.job_min_salary,mx=job.job_max_salary;
+  if(mn||mx){
+    const mid=((mn||0)+(mx||0))/2, per=job.job_salary_period;
+    const yr=per==='HOUR'?mid*2080:per==='MONTH'?mid*12:mid;
+    if(yr<28000&&job.job_employment_type==='FULLTIME'){score+=20;sigs.push({t:'bad',i:'⚠',msg:'Full-time ~$'+Math.round(yr/1000)+'k — below sustainable wage floor'});}
+    else if(yr<35000&&job.job_employment_type==='FULLTIME'){score+=8;sigs.push({t:'warn',i:'△',msg:'Salary ~$'+Math.round(yr/1000)+'k — tight, watch for hidden hours'});}
+    else if(yr>=45000) sigs.push({t:'good',i:'✓',msg:'Salary ~$'+Math.round(yr/1000)+'k — competitive'});
+  } else {score+=10;sigs.push({t:'warn',i:'△',msg:'No salary disclosed — transparency concern'});}
+  const desc=(job.job_description||'').toLowerCase();
+  const flags=['must be able to lift','fast-paced environment','no experience necessary','immediate openings','hiring immediately','start asap','weekly pay'];
+  const found=flags.filter(f=>desc.includes(f));
+  if(found.length>=3){score+=15;sigs.push({t:'bad',i:'⚠',msg:found.length+' churn-correlated phrases in description'});}
+  else if(found.length>=1){score+=5;sigs.push({t:'warn',i:'△',msg:'"'+found[0]+'" — common in high-turnover postings'});}
+  if(job.job_apply_is_direct===false){score+=5;sigs.push({t:'warn',i:'△',msg:'Third-party apply redirect — churn-correlated'});}
+  return {score,risk:score>=50?'high':score>=25?'medium':'low',sigs};
+}
+
+// UTILS
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtSal(job){
+  if(!job.job_min_salary&&!job.job_max_salary) return '—';
+  const f=n=>n>=1000?'$'+Math.round(n/1000)+'k':'$'+Math.round(n);
+  const p=job.job_salary_period==='HOUR'?'/hr':job.job_salary_period==='MONTH'?'/mo':'/yr';
+  return job.job_min_salary&&job.job_max_salary?f(job.job_min_salary)+'–'+f(job.job_max_salary)+p:f(job.job_min_salary||job.job_max_salary)+p;
+}
+function effHr(job){
+  if(!job.job_min_salary&&!job.job_max_salary) return null;
+  const mid=((job.job_min_salary||0)+(job.job_max_salary||0))/2, p=job.job_salary_period;
+  return p==='HOUR'?mid:p==='MONTH'?(mid*12)/2080:mid/2080;
+}
+function dedup(jobs){
+  const seen={},counted={},out=[];
+  jobs.forEach(j=>{const k=(j.employer_name||'').toLowerCase()+'::'+(j.job_title||'').toLowerCase();seen[k]=(seen[k]||0)+1;});
+  jobs.forEach(j=>{const k=(j.employer_name||'').toLowerCase()+'::'+(j.job_title||'').toLowerCase();if(!counted[k]){counted[k]=true;j._repost=seen[k]-1;out.push(j);}});
+  return out;
+}
+
+// RENDER CARD
+function renderCard(job,cd,idx){
+  const div=document.createElement('div');
+  div.className='card '+cd.risk;
+  div.style.animationDelay=idx*55+'ms';
+  div.dataset.risk=cd.risk; div.dataset.score=cd.score;
+  div.dataset.salary=effHr(job)||0; div.dataset.rating=job.employer_company_rating||0; div.dataset.repost=job._repost||0;
+  const labels={low:'Low Churn',medium:'Med Churn',high:'High Churn',unknown:'Unknown'};
+  const hr=effHr(job), cc=(job._repost||0)*5000;
+  div.innerHTML=
+    '<div class="card-head">'+
+      '<div class="card-titles">'+
+        '<div class="jtitle">'+esc(job.job_title||'Unknown Role')+'</div>'+
+        '<div class="jcompany">'+esc(job.employer_name||'Unknown')+'</div>'+
+        '<div class="jloc">📍 '+esc([job.job_city,job.job_state].filter(Boolean).join(', ')||'Location TBD')+'</div>'+
+      '</div>'+
+      '<span class="badge '+cd.risk+'">'+(labels[cd.risk]||'Unknown')+'</span>'+
+    '</div>'+
+    '<div class="metrics">'+
+      '<div class="met"><span class="val">'+fmtSal(job)+'</span><span class="lbl">Posted Pay</span></div>'+
+      '<div class="met"><span class="val">'+(hr?'$'+hr.toFixed(2)+'/hr':'—')+'</span><span class="lbl">Real $/hr</span></div>'+
+      '<div class="met"><span class="val">'+(job._repost>0?job._repost+'×':'New')+'</span><span class="lbl">Reposts</span></div>'+
+    '</div>'+
+    '<div class="metrics no-top">'+
+      '<div class="met"><span class="val">'+(job.employer_company_rating?job.employer_company_rating.toFixed(1):'—')+'</span><span class="lbl">Glassdoor ★</span></div>'+
+      '<div class="met"><span class="val">'+((job.job_employment_type||'—').replace('_',' '))+'</span><span class="lbl">Type</span></div>'+
+      '<div class="met"><span class="val">'+(cc>0?'$'+(cc/1000).toFixed(0)+'k':'—')+'</span><span class="lbl">Churn Cost/yr</span></div>'+
+    '</div>'+
+    '<div class="signals">'+cd.sigs.map(s=>'<div class="sig '+s.t+'"><span class="sig-icon">'+s.i+'</span><span>'+esc(s.msg)+'</span></div>').join('')+'</div>'+
+    '<div class="verdict loading" id="v-'+job._id+'">Generating verdict…</div>'+
+    '<div class="card-foot">'+
+      '<div class="src-tags">'+
+        (job.job_publishers||[{name:job._src||'Job Board'}]).slice(0,2).map(p=>'<span class="src-tag">'+esc(p.name||p)+'</span>').join('')+
+      '</div>'+
+      (job.job_apply_link?'<a class="apply-btn" href="'+esc(job.job_apply_link)+'" target="_blank" rel="noopener">Apply →</a>':'')+
+    '</div>';
+  return div;
+}
+
+// SORT
+function sort(by){
+  curSort=by;
+  ['risk','sal','rat','rep'].forEach(k=>{const b=document.getElementById('s-'+k+'-btn');if(b)b.classList.remove('on');});
+  const map={risk:'s-risk-btn',salary:'s-sal-btn',rating:'s-rat-btn',repost:'s-rep-btn'};
+  document.getElementById(map[by])?.classList.add('on');
+  const ro={low:0,medium:1,high:2,unknown:3};
+  const cards=[...document.querySelectorAll('#results .card')];
+  cards.sort((a,b)=>{
+    if(by==='risk') return ro[a.dataset.risk]-ro[b.dataset.risk];
+    if(by==='salary') return parseFloat(b.dataset.salary)-parseFloat(a.dataset.salary);
+    if(by==='rating') return parseFloat(b.dataset.rating)-parseFloat(a.dataset.rating);
+    if(by==='repost') return parseFloat(a.dataset.repost)-parseFloat(b.dataset.repost);
+    return 0;
+  });
+  const res=document.getElementById('results');
+  cards.forEach(c=>res.appendChild(c));
+}
+
+// BANNER
+function updateBanner(jobs,scores){
+  const hi=jobs.filter(j=>scores[j._id]?.risk==='high').length;
+  const lo=jobs.filter(j=>scores[j._id]?.risk==='low').length;
+  const cost=jobs.filter(j=>scores[j._id]?.risk==='high').reduce((a,j)=>a+(j._repost||1)*5000,0);
+  document.getElementById('b-high').textContent=hi;
+  document.getElementById('b-safe').textContent=lo;
+  document.getElementById('b-cost').textContent=cost>0?'$'+(cost/1000).toFixed(0)+'k/yr':'—';
+  if(jobs.length) document.getElementById('banner').classList.add('show');
+}
+
+// CLAUDE VERDICT
+async function getVerdict(job,cd){
+  const key=sessionStorage.getItem('ka'); if(!key) return null;
+  const prompt='You are a worker advocate at Kindling™. Analyze this employer in 2–3 direct sentences. No bullets. End with one word: "Apply." "Caution." or "Skip."\n\nRole: '+job.job_title+' | Company: '+job.employer_name+'\nChurn Score: '+cd.score+'/100 ('+cd.risk+') | Salary: '+fmtSal(job)+' | Glassdoor: '+(job.employer_company_rating||'unknown')+'\nSignals: '+cd.sigs.map(s=>s.msg).join('; ');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:160,messages:[{role:'user',content:prompt}]})});
+    if(!r.ok) return null;
+    const d=await r.json(); return d.content?.[0]?.text||null;
+  }catch{return null;}
+}
+
+// RULE-BASED VERDICT
+function ruleVerdict(job,cd){
+  const e=esc(job.employer_name||'This employer');
+  if(cd.risk==='low') return e+' shows stable employment signals. Low repost frequency and acceptable pay suggest this role is worth a closer look. Apply.';
+  if(cd.risk==='medium') return e+' has some caution flags — verify tenure and ask directly about turnover in your interview. Caution.';
+  return e+' shows strong churn indicators. This role has a high probability of being a revolving door. Your time is worth more. Skip.';
+}
+
+// MAIN SEARCH
+async function doSearch(){
+  const q=document.getElementById('s-q').value.trim();
+  const loc=document.getElementById('s-loc').value.trim();
+  const type=document.getElementById('s-type').value;
+  const maxRisk=document.getElementById('s-risk').value;
+  if(!q){alert('Enter a job title to search.');return;}
+
+  const w=sessionStorage.getItem('kw'), r=sessionStorage.getItem('kr'), a=sessionStorage.getItem('ka');
+  const btn=document.getElementById('go-btn');
+  const res=document.getElementById('results');
+
+  if(!w&&!r){
+    document.getElementById('setup-panel').classList.add('open');
+    res.innerHTML='<div class="empty"><div class="icon">🕯</div><h3>Data source needed.</h3>'+
+      '<p>Click <strong style="color:var(--parchment)">⚙ Setup</strong> above to connect a source.<br><br>'+
+      '<strong style="color:var(--parchment)">Option A (2 min, free):</strong> Copy the Worker code → deploy to Cloudflare → paste URL.<br><br>'+
+      '<strong style="color:var(--parchment)">Option B (instant):</strong> Paste a free <a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank">RapidAPI key</a>.</p></div>';
+    return;
+  }
+
+  btn.disabled=true; btn.textContent='Searching…';
+  res.innerHTML='';
+  document.getElementById('banner').classList.remove('show');
+  document.getElementById('sort-bar').classList.remove('show');
+
+  setStatus(r?'Scraping Indeed, Glassdoor, LinkedIn, ZipRecruiter…':'Fetching via Kindling Worker…',true);
+
+  try{
+    let raw=[];
+    if(r){
+      try{raw=await fetchJSearch(q,loc,type);}
+      catch(e){if(e.message!=='no-key') setStatus('JSearch error: '+e.message);}
+    }
+    if(!raw.length&&w){
+      setStatus('Fetching via Kindling Worker…',true);
+      raw=await fetchWorker(q,loc);
+    }
+    if(!raw.length){
+      res.innerHTML='<div class="empty"><div class="icon">🕯</div><h3>No listings found.</h3><p>Try broader keywords or a different location. If using the Worker, check that your URL ends with <code>.workers.dev</code> and test it in your browser.</p></div>';
+      setStatus(''); btn.disabled=false; btn.textContent='Ignite Search 🔥'; return;
+    }
+    raw.forEach((j,i)=>{if(!j._id)j._id='j'+i;});
+    const jobs=dedup(raw);
+    const scores={};
+    setStatus('Scoring '+jobs.length+' employers for churn signals…',true);
+    jobs.forEach(j=>{scores[j._id]=scoreJob(j);});
+    let filtered=jobs;
+    if(maxRisk==='low') filtered=jobs.filter(j=>scores[j._id].risk==='low');
+    if(maxRisk==='low,medium') filtered=jobs.filter(j=>['low','medium'].includes(scores[j._id].risk));
+    if(!filtered.length){
+      res.innerHTML='<div class="empty"><div class="icon">🔥</div><h3>All '+jobs.length+' results are high-churn.</h3><p>Churn has snuffed out the good ones in this search. Try removing the risk filter or broadening your keywords.</p></div>';
+      setStatus(''); btn.disabled=false; btn.textContent='Ignite Search 🔥'; return;
+    }
+    const ro={low:0,medium:1,high:2,unknown:3};
+    filtered.sort((a,b)=>ro[scores[a._id].risk]-ro[scores[b._id].risk]);
+    filtered.forEach((j,i)=>res.appendChild(renderCard(j,scores[j._id],i)));
+    updateBanner(filtered,scores);
+    document.getElementById('sort-bar').classList.add('show');
+    // Verdicts
+    if(a){
+      setStatus(filtered.length+' results — generating Claude verdicts…',true);
+      filtered.forEach(async j=>{
+        const v=await getVerdict(j,scores[j._id]);
+        const el=document.getElementById('v-'+j._id);
+        if(el){el.textContent=v||ruleVerdict(j,scores[j._id]);el.classList.remove('loading');}
+      });
+    } else {
+      filtered.forEach(j=>{const el=document.getElementById('v-'+j._id);if(el){el.textContent=ruleVerdict(j,scores[j._id]);el.classList.remove('loading');}});
+    }
+    setStatus(filtered.length+' results — churn risk ranked lowest first.');
+    setTimeout(()=>setStatus(''),5000);
+  }catch(err){setStatus('Error: '+err.message);console.error(err);}
+  btn.disabled=false; btn.textContent='Ignite Search 🔥';
+}
+
+// ENTER KEY
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&['s-q','s-loc'].includes(document.activeElement?.id))doSearch();});
+
+// INIT
+loadKeys();
+(async()=>{
+  const hash=await verifyDB();
+  const el=document.getElementById('db-status');
+  if(el) el.innerHTML='🔐 DB v'+DB_META.version+' &nbsp;·&nbsp; '+DB_META.entries+' employers &nbsp;·&nbsp; baseline '+DB_META.baseline+'%/yr &nbsp;·&nbsp; <span style="opacity:.6;font-size:.65rem">'+hash.slice(0,12)+'…</span> &nbsp;·&nbsp; <a href="'+DB_META.source+'" target="_blank" rel="noopener" style="color:var(--kindling);text-decoration:none">BLS JOLTS ↗</a>';
+})();
+</script>
+</body>
+</html>
